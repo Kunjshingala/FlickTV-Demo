@@ -18,12 +18,14 @@ class _HomeScreenState extends State<HomeScreen> {
         backgroundColor: Colors.transparent,
         leading: GlassedIconContainer(
           margin: EdgeInsetsDirectional.only(start: commonHorizontalSpacing),
-          iconData: Icons.arrow_back_ios_new,
+          iconData: Icons.chevron_left_rounded,
+          iconSize: dimensions.deviceAverage * 0.032,
         ),
         actions: [
           GlassedIconContainer(
             margin: EdgeInsetsDirectional.only(end: commonHorizontalSpacing),
             iconData: Icons.settings,
+            iconSize: dimensions.deviceAverage * 0.036,
           ),
         ],
       ),

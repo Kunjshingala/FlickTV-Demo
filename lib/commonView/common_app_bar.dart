@@ -17,6 +17,7 @@ class CommonAppBar extends StatelessWidget implements PreferredSizeWidget {
   final double? elevation;
   final double? scrolledUnderElevation;
   final double? toolbarHeight;
+  final double? leadingWidth;
   final SystemUiOverlayStyle? systemUiOverlayStyle;
 
   const CommonAppBar({
@@ -32,6 +33,7 @@ class CommonAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.elevation = 0,
     this.scrolledUnderElevation = 0,
     this.toolbarHeight,
+    this.leadingWidth,
     this.systemUiOverlayStyle,
   });
 
@@ -42,11 +44,18 @@ class CommonAppBar extends StatelessWidget implements PreferredSizeWidget {
 
     Widget? leadingWidget = leading;
     if (leadingWidget == null && automaticallyImplyLeading && canPop) {
-      leadingWidget = Padding(
-        padding: EdgeInsetsDirectional.only(start: commonHorizontalSpacing),
-        child: GlassedIconContainer(iconData: Icons.chevron_left_rounded),
+      leadingWidget = GlassedIconContainer(
+        margin: EdgeInsetsDirectional.only(start: commonHorizontalSpacing),
+        iconData: Icons.chevron_left_rounded,
       );
     }
+
+    final Widget? appBarLeading = leadingWidget == null
+        ? null
+        : Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: leadingWidget,
+          );
 
     return AppBar(
       toolbarHeight: toolbarHeight,
@@ -55,7 +64,8 @@ class CommonAppBar extends StatelessWidget implements PreferredSizeWidget {
       scrolledUnderElevation: scrolledUnderElevation,
       surfaceTintColor: surfaceTintColor,
       automaticallyImplyLeading: false,
-      leading: leadingWidget,
+      leadingWidth: leadingWidget == null ? null : leadingWidth ?? (commonHorizontalSpacing + kToolbarHeight),
+      leading: appBarLeading,
       title: customTitle ?? ((titleText.isNotEmpty) ? Text(titleText, style: commonTextStyle()) : SizedBox.shrink()),
       centerTitle: centerTitle,
       actions: actions,
