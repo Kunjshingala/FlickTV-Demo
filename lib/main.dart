@@ -28,10 +28,6 @@ class MyApp extends StatelessWidget {
         dimensions.setDeviceHeight = data.size.height;
         dimensions.setDeviceWidth = data.size.width;
 
-        debugPrint("Dimensions w = ${dimensions.deviceWidth}");
-        debugPrint("Dimensions h = ${dimensions.deviceHeight}");
-        debugPrint("Dimensions avg = ${dimensions.deviceAverage}");
-
         return MediaQuery(
           data: MediaQuery.of(context).copyWith(textScaler: TextScaler.linear(1.0)),
           child: child ?? SizedBox.shrink(),

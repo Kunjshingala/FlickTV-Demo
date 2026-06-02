@@ -5,11 +5,11 @@ class Dimensions {
 
   static final Dimensions instance = Dimensions._();
 
-  late double? _deviceHeight;
-  late double? _deviceWidth;
+  double _deviceHeight = 0;
+  double _deviceWidth = 0;
 
-  double get deviceHeight => _deviceHeight ?? 0;
-  double get deviceWidth => _deviceWidth ?? 0;
+  double get deviceHeight => _deviceHeight;
+  double get deviceWidth => _deviceWidth;
   double get deviceAverage => (deviceHeight + deviceWidth) / 2;
 
   set setDeviceHeight(double value) {
@@ -21,4 +21,4 @@ class Dimensions {
   }
 }
 
-final commonHorizontalSpacing = dimensions.deviceWidth * 0.04;
+double get commonHorizontalSpacing => dimensions.deviceWidth * 0.04;
