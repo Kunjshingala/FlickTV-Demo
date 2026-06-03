@@ -1,10 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:lottie/lottie.dart';
 
 import 'screen/home/home.dart';
 import 'utils/utils.dart';
 
-void main() {
+LottieComposition? preloadedConfetti;
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  try {
+    preloadedConfetti = await AssetLottie('assets/lottie/confetti.json').load();
+  } catch (e) {
+    debugPrint("Failed to preload confetti: $e");
+  }
+
   runApp(const MyApp());
 }
 
@@ -30,10 +41,10 @@ class MyApp extends StatelessWidget {
 
         return MediaQuery(
           data: MediaQuery.of(context).copyWith(textScaler: TextScaler.linear(1.0)),
-          child: child ?? SizedBox.shrink(),
+          child: child ?? const SizedBox.shrink(),
         );
       },
-      home: HomeScreen(),
+      home: const HomeScreen(),
     );
   }
 }

@@ -14,28 +14,21 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   late final AnimationController _introController;
   late final AnimationController _hoverController;
-  late final AnimationController _confettiController;
+  late final ValueNotifier<bool> _playConfetti = ValueNotifier(false);
 
   @override
   void initState() {
     super.initState();
 
-    _introController = AnimationController(vsync: this, duration: _HomeTimings.introDuration)..forward();
-    _hoverController = AnimationController(vsync: this, duration: _HomeTimings.hoverDuration)..forward();
-    _confettiController = AnimationController(vsync: this);
-
-    Future<void>.delayed(_HomeTimings.confettiDelay, () {
-      if (mounted) {
-        _confettiController.forward(from: 0);
-      }
-    });
+    _introController = AnimationController(vsync: this, duration: _HomeTimings.introDuration);
+    _hoverController = AnimationController(vsync: this, duration: _HomeTimings.hoverDuration);
   }
 
   @override
   void dispose() {
     _introController.dispose();
     _hoverController.dispose();
-    _confettiController.dispose();
+    _playConfetti.dispose();
     super.dispose();
   }
 
@@ -54,27 +47,33 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           body: _HomeContent(introController: _introController, hoverController: _hoverController),
         ),
         _HomeAppBarOverlay(introController: _introController),
-        IgnorePointer(
-          child: FadeTransition(
-            opacity: CurvedAnimation(
-              parent: _introController,
-              curve: _HomeTimings.confettiFade,
-              reverseCurve: Curves.easeIn,
-            ),
-            child: Lottie.asset(
-              'assets/lottie/confetti.json',
-              controller: _confettiController,
-              alignment: AlignmentDirectional.topCenter,
-              width: double.maxFinite,
-              height: dimensions.deviceHeight * 0.65,
-              fit: BoxFit.cover,
-              frameRate: FrameRate.max,
-              repeat: false,
-              onLoaded: (composition) {
-                _confettiController.duration = composition.duration;
-              },
-            ),
-          ),
+        ValueListenableBuilder<bool>(
+          valueListenable: _playConfetti,
+          builder: (context, play, _) {
+            return IgnorePointer(
+              child: Lottie.asset(
+                'assets/lottie/confetti.json',
+                animate: play,
+                alignment: AlignmentDirectional.topCenter,
+                width: double.maxFinite,
+                height: dimensions.deviceHeight * 0.65,
+                fit: BoxFit.cover,
+                frameRate: FrameRate.max,
+                repeat: false,
+                onLoaded: (composition) {
+                  // Start all animations only after Lottie parsing is complete
+                  _introController.forward();
+                  _hoverController.forward();
+
+                  Future<void>.delayed(_HomeTimings.confettiDelay, () {
+                    if (mounted) {
+                      _playConfetti.value = true;
+                    }
+                  });
+                },
+              ),
+            );
+          },
         ),
       ],
     );
@@ -90,32 +89,27 @@ class _HomeAppBarOverlay extends StatelessWidget {
   Widget build(BuildContext context) {
     final double topInset = MediaQuery.of(context).viewPadding.top;
 
-    return PositionedDirectional(
-      top: topInset,
-      start: 0,
-      end: 0,
-      child: Padding(
-        padding: EdgeInsetsDirectional.symmetric(horizontal: commonHorizontalSpacing),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            _Reveal(
-              controller: introController,
-              interval: _HomeTimings.leadingReveal,
-              slideBegin: const Offset(-1.2, 0),
-              scale: false,
-              child: GlassedIconContainer(
-                iconData: Icons.chevron_left_rounded,
-                iconSize: dimensions.deviceAverage * 0.032,
-              ),
+    return Padding(
+      padding: EdgeInsetsDirectional.only(top: topInset, start: commonHorizontalSpacing, end: commonHorizontalSpacing),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          _Reveal(
+            controller: introController,
+            interval: _HomeTimings.leadingReveal,
+            slideBegin: const Offset(-1.2, 0),
+            scale: false,
+            child: GlassedIconContainer(
+              iconData: Icons.chevron_left_rounded,
+              iconSize: dimensions.deviceAverage * 0.032,
             ),
-            _Reveal(
-              controller: introController,
-              interval: _HomeTimings.settingsReveal,
-              child: GlassedIconContainer(iconData: Icons.settings, iconSize: dimensions.deviceAverage * 0.036),
-            ),
-          ],
-        ),
+          ),
+          _Reveal(
+            controller: introController,
+            interval: _HomeTimings.settingsReveal,
+            child: GlassedIconContainer(iconData: Icons.settings, iconSize: dimensions.deviceAverage * 0.036),
+          ),
+        ],
       ),
     );
   }
@@ -190,21 +184,20 @@ class _IntroTimeline extends StatelessWidget {
     return AnimatedBuilder(
       animation: Listenable.merge([introController, hoverController]),
       builder: (context, child) {
-        // final double walletLift = Tween<double>(
-        //   begin: dimensions.deviceHeight * 0.18,
-        //   end: 0,
-        // ).animate(CurvedAnimation(parent: introController, curve: _HomeTimings.walletLift)).value;
-
         final double walletLift = TweenSequence<double>([
           TweenSequenceItem(
-            tween: Tween<double>(begin: dimensions.deviceHeight * 0.15, end: dimensions.deviceHeight * 0.30)
-                .chain(CurveTween(curve: Curves.easeOutCubic)),
+            tween: Tween<double>(
+              begin: dimensions.deviceHeight * 0.15,
+              end: dimensions.deviceHeight * 0.30,
+            ).chain(CurveTween(curve: Curves.easeOutCubic)),
             weight: 10,
           ),
           TweenSequenceItem(tween: ConstantTween<double>(dimensions.deviceHeight * 0.30), weight: 21),
           TweenSequenceItem(
-            tween: Tween<double>(begin: dimensions.deviceHeight * 0.30, end: 0)
-                .chain(CurveTween(curve: Curves.easeInOutCubic)),
+            tween: Tween<double>(
+              begin: dimensions.deviceHeight * 0.30,
+              end: 0,
+            ).chain(CurveTween(curve: Curves.easeInOutCubic)),
             weight: 14,
           ),
           TweenSequenceItem(tween: ConstantTween<double>(0), weight: 55),
