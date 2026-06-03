@@ -6,9 +6,17 @@ class CommonCard extends StatelessWidget {
   final String assetsString;
   final String title;
   final String message;
+  final Color? backgroundColor;
   final VoidCallback? onTap;
 
-  const CommonCard({super.key, required this.assetsString, required this.title, required this.message, this.onTap});
+  const CommonCard({
+    super.key,
+    required this.assetsString,
+    required this.title,
+    required this.message,
+    this.backgroundColor,
+    this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -21,6 +29,7 @@ class CommonCard extends StatelessWidget {
           vertical: dimensions.deviceHeight * 0.015,
         ),
         decoration: BoxDecoration(
+          color: backgroundColor,
           border: Border.all(color: colorBorder.withValues(alpha: 0.25), width: 1),
           borderRadius: BorderRadiusDirectional.circular(dimensions.deviceAverage * 0.0225),
           boxShadow: [BoxShadow(color: Colors.white.withValues(alpha: 0.275), blurStyle: BlurStyle.inner)],
