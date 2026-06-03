@@ -151,11 +151,13 @@ class _TopGlow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final Size size = MediaQuery.sizeOf(context);
+
     return Align(
       alignment: AlignmentDirectional.topCenter,
       child: Container(
         width: double.maxFinite,
-        height: dimensions.deviceHeight * 0.3,
+        height: size.height * 0.3,
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: AlignmentDirectional.topCenter,
@@ -188,10 +190,26 @@ class _IntroTimeline extends StatelessWidget {
     return AnimatedBuilder(
       animation: Listenable.merge([introController, hoverController]),
       builder: (context, child) {
-        final double walletLift = Tween<double>(
-          begin: dimensions.deviceHeight * 0.18,
-          end: 0,
-        ).animate(CurvedAnimation(parent: introController, curve: _HomeTimings.walletLift)).value;
+        // final double walletLift = Tween<double>(
+        //   begin: dimensions.deviceHeight * 0.18,
+        //   end: 0,
+        // ).animate(CurvedAnimation(parent: introController, curve: _HomeTimings.walletLift)).value;
+
+        final double walletLift = TweenSequence<double>([
+          TweenSequenceItem(
+            tween: Tween<double>(begin: dimensions.deviceHeight * 0.15, end: dimensions.deviceHeight * 0.30)
+                .chain(CurveTween(curve: Curves.easeOutCubic)),
+            weight: 10,
+          ),
+          TweenSequenceItem(tween: ConstantTween<double>(dimensions.deviceHeight * 0.30), weight: 21),
+          TweenSequenceItem(
+            tween: Tween<double>(begin: dimensions.deviceHeight * 0.30, end: 0)
+                .chain(CurveTween(curve: Curves.easeInOutCubic)),
+            weight: 14,
+          ),
+          TweenSequenceItem(tween: ConstantTween<double>(0), weight: 55),
+        ]).animate(introController).value;
+
         final double hoverOffset = Tween<double>(
           begin: -6,
           end: 6,
@@ -199,7 +217,7 @@ class _IntroTimeline extends StatelessWidget {
         final Color cardBackgroundColor =
             Color.lerp(
               Colors.transparent,
-              Colors.white.withValues(alpha: 0.1),
+              Colors.white.withValues(alpha: 0.08),
               CurvedAnimation(parent: introController, curve: _HomeTimings.cardBackgroundReveal).value,
             ) ??
             Colors.transparent;
@@ -413,16 +431,15 @@ class _Reveal extends StatelessWidget {
 class _HomeTimings {
   static const Duration introDuration = Duration(milliseconds: 8000);
   static const Duration hoverDuration = Duration(milliseconds: 2200);
-  static const Duration confettiDelay = Duration(milliseconds: 1000);
+  static const Duration confettiDelay = Duration(milliseconds: 800);
 
   static const Interval confettiFade = Interval(0.12, 0.42, curve: Curves.easeOut);
   static const Interval leadingReveal = Interval(0, 0.18, curve: Curves.easeOutCubic);
   static const Interval settingsReveal = Interval(0.76, 0.90, curve: Curves.easeOutCubic);
 
-  static const Interval walletReveal = Interval(0, 0.14, curve: Curves.easeOutCubic);
-  static const Interval brandTextReveal = Interval(0.05, 0.20, curve: Curves.easeOutCubic);
-  static const Interval brandMoneyReveal = Interval(0.08, 0.24, curve: Curves.easeOutCubic);
-  static const Interval walletLift = Interval(0.28, 0.48, curve: Curves.easeOutCubic);
+  static const Interval walletReveal = Interval(0, 0.10, curve: Curves.easeOutCubic);
+  static const Interval brandTextReveal = Interval(0.12, 0.22, curve: Curves.easeOutCubic);
+  static const Interval brandMoneyReveal = Interval(0.15, 0.25, curve: Curves.easeOutCubic);
 
   static const Interval card1Reveal = Interval(0.50, 0.62, curve: Curves.easeOutCubic);
   static const Interval card2Reveal = Interval(0.56, 0.68, curve: Curves.easeOutCubic);
