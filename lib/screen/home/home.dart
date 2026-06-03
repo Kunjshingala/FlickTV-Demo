@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
 
 import '../../commonView/common_view.dart';
 import '../../utils/utils.dart';
@@ -11,27 +12,60 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  late final Future<LottieComposition> _composition;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _composition = AssetLottie('assets/lottie/confetti.json').load();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: CommonAppBar(
-        backgroundColor: Colors.transparent,
-        leading: GlassedIconContainer(
-          margin: EdgeInsetsDirectional.only(start: commonHorizontalSpacing),
-          iconData: Icons.chevron_left_rounded,
-          iconSize: dimensions.deviceAverage * 0.032,
-        ),
-        actions: [
-          GlassedIconContainer(
-            margin: EdgeInsetsDirectional.only(end: commonHorizontalSpacing),
-            iconData: Icons.settings,
-            iconSize: dimensions.deviceAverage * 0.036,
-          ),
-        ],
-      ),
-      extendBodyBehindAppBar: true,
-      extendBody: true,
-      body: _buildHome(context),
+    return FutureBuilder<LottieComposition>(
+      future: _composition,
+      builder: (context, compositionSnapshot) {
+        return Stack(
+          children: [
+            Scaffold(
+              appBar: CommonAppBar(
+                backgroundColor: Colors.transparent,
+                leading: GlassedIconContainer(
+                  margin: EdgeInsetsDirectional.only(start: commonHorizontalSpacing),
+                  iconData: Icons.chevron_left_rounded,
+                  iconSize: dimensions.deviceAverage * 0.032,
+                ),
+                actions: [
+                  GlassedIconContainer(
+                    margin: EdgeInsetsDirectional.only(end: commonHorizontalSpacing),
+                    iconData: Icons.settings,
+                    iconSize: dimensions.deviceAverage * 0.036,
+                  ),
+                ],
+              ),
+              extendBodyBehindAppBar: true,
+              extendBody: true,
+              body: _buildHome(context),
+            ),
+
+            if (!compositionSnapshot.hasData)
+              const SizedBox.shrink()
+            else
+              IgnorePointer(
+                child: Lottie(
+                  alignment: AlignmentDirectional.center,
+                  composition: compositionSnapshot.data!,
+                  width: double.maxFinite,
+                  height: double.maxFinite,
+                  fit: BoxFit.fitHeight,
+                  frameRate: FrameRate.max,
+                  repeat: false,
+                ),
+              ),
+          ],
+        );
+      },
     );
   }
 }
