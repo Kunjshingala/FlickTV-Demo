@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 
 import '../../commonView/common_view.dart';
+import '../../l10n/l10n.dart';
+import '../../utils/preloaded_assets.dart';
 import '../../utils/utils.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -22,6 +24,21 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
     _introController = AnimationController(vsync: this, duration: _HomeTimings.introDuration);
     _hoverController = AnimationController(vsync: this, duration: _HomeTimings.hoverDuration);
+
+    // The confetti is preloaded, so there's nothing to wait for — start the
+    // sequence on the first frame instead of on a Lottie onLoaded callback.
+    WidgetsBinding.instance.addPostFrameCallback((_) => _startIntroSequence());
+  }
+
+  void _startIntroSequence() {
+    if (!mounted) return;
+
+    _introController.forward();
+    _hoverController.forward();
+
+    Future<void>.delayed(_HomeTimings.confettiDelay, () {
+      if (mounted) _playConfetti.value = true;
+    });
   }
 
   @override
@@ -49,33 +66,40 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         _HomeAppBarOverlay(introController: _introController),
         ValueListenableBuilder<bool>(
           valueListenable: _playConfetti,
-          builder: (context, play, _) {
-            return IgnorePointer(
-              child: Lottie.asset(
-                'assets/lottie/confetti.json',
-                animate: play,
-                alignment: AlignmentDirectional.topCenter,
-                width: double.maxFinite,
-                height: dimensions.deviceHeight * 0.65,
-                fit: BoxFit.cover,
-                frameRate: FrameRate.max,
-                repeat: false,
-                onLoaded: (composition) {
-                  // Start all animations only after Lottie parsing is complete
-                  _introController.forward();
-                  _hoverController.forward();
-
-                  Future<void>.delayed(_HomeTimings.confettiDelay, () {
-                    if (mounted) {
-                      _playConfetti.value = true;
-                    }
-                  });
-                },
-              ),
-            );
-          },
+          builder: (context, play, _) => IgnorePointer(child: _buildConfetti(context, play)),
         ),
       ],
+    );
+  }
+
+  Widget _buildConfetti(BuildContext context, bool play) {
+    final double height = context.sizing.height * 0.65;
+    final LottieComposition? composition = PreloadedAssets.confetti;
+
+    // Preloaded path: render the already-parsed composition (no parse hitch).
+    if (composition != null) {
+      return Lottie(
+        composition: composition,
+        animate: play,
+        alignment: AlignmentDirectional.topCenter,
+        width: double.maxFinite,
+        height: height,
+        fit: BoxFit.cover,
+        frameRate: FrameRate.max,
+        repeat: false,
+      );
+    }
+
+    // Fallback: preload failed — load straight from the asset.
+    return Lottie.asset(
+      'assets/lottie/confetti.json',
+      animate: play,
+      alignment: AlignmentDirectional.topCenter,
+      width: double.maxFinite,
+      height: height,
+      fit: BoxFit.cover,
+      frameRate: FrameRate.max,
+      repeat: false,
     );
   }
 }
@@ -90,7 +114,7 @@ class _HomeAppBarOverlay extends StatelessWidget {
     final double topInset = MediaQuery.of(context).viewPadding.top;
 
     return Padding(
-      padding: EdgeInsetsDirectional.only(top: topInset, start: commonHorizontalSpacing, end: commonHorizontalSpacing),
+      padding: EdgeInsetsDirectional.only(top: topInset, start: context.sizing.hSpacing, end: context.sizing.hSpacing),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -101,13 +125,13 @@ class _HomeAppBarOverlay extends StatelessWidget {
             scale: false,
             child: GlassedIconContainer(
               iconData: Icons.chevron_left_rounded,
-              iconSize: dimensions.deviceAverage * 0.032,
+              iconSize: context.sizing.avg * 0.032,
             ),
           ),
           _Reveal(
             controller: introController,
             interval: _HomeTimings.settingsReveal,
-            child: GlassedIconContainer(iconData: Icons.settings, iconSize: dimensions.deviceAverage * 0.036),
+            child: GlassedIconContainer(iconData: Icons.settings, iconSize: context.sizing.avg * 0.036),
           ),
         ],
       ),
@@ -131,7 +155,7 @@ class _HomeContent extends StatelessWidget {
         Align(
           alignment: AlignmentDirectional.center,
           child: SingleChildScrollView(
-            padding: EdgeInsetsDirectional.symmetric(horizontal: commonHorizontalSpacing, vertical: topInset),
+            padding: EdgeInsetsDirectional.symmetric(horizontal: context.sizing.hSpacing, vertical: topInset),
             child: _IntroTimeline(introController: introController, hoverController: hoverController),
           ),
         ),
@@ -157,15 +181,15 @@ class _TopGlow extends StatelessWidget {
             begin: AlignmentDirectional.topCenter,
             end: AlignmentDirectional.bottomCenter,
             colors: [
-              colorPrimary.withValues(alpha: 0.5),
-              colorPrimary.withValues(alpha: 0.25),
-              colorPrimary.withValues(alpha: 0.0),
+              context.appColors.brand.withValues(alpha: 0.5),
+              context.appColors.brand.withValues(alpha: 0.25),
+              context.appColors.brand.withValues(alpha: 0.0),
             ],
           ),
         ),
         child: RepaintBoundary(
           child: CustomPaint(
-            painter: HalftonePainter(color: colorPrimary, spacing: 10, maxRadius: 2, fadeHeightFactor: 0.7),
+            painter: HalftonePainter(color: context.appColors.brand, spacing: 10, maxRadius: 2, fadeHeightFactor: 0.7),
           ),
         ),
       ),
@@ -187,15 +211,15 @@ class _IntroTimeline extends StatelessWidget {
         final double walletLift = TweenSequence<double>([
           TweenSequenceItem(
             tween: Tween<double>(
-              begin: dimensions.deviceHeight * 0.15,
-              end: dimensions.deviceHeight * 0.30,
+              begin: context.sizing.height * 0.15,
+              end: context.sizing.height * 0.30,
             ).chain(CurveTween(curve: Curves.easeOutCubic)),
             weight: 10,
           ),
-          TweenSequenceItem(tween: ConstantTween<double>(dimensions.deviceHeight * 0.30), weight: 21),
+          TweenSequenceItem(tween: ConstantTween<double>(context.sizing.height * 0.30), weight: 21),
           TweenSequenceItem(
             tween: Tween<double>(
-              begin: dimensions.deviceHeight * 0.30,
+              begin: context.sizing.height * 0.30,
               end: 0,
             ).chain(CurveTween(curve: Curves.easeInOutCubic)),
             weight: 14,
@@ -249,8 +273,8 @@ class _IntroBrandBlock extends StatelessWidget {
               interval: _HomeTimings.walletReveal,
               child: Image.asset(
                 'assets/images/wallet.png',
-                width: dimensions.deviceAverage * 0.25,
-                height: dimensions.deviceAverage * 0.25,
+                width: context.sizing.avg * 0.25,
+                height: context.sizing.avg * 0.25,
                 fit: BoxFit.cover,
               ),
             ),
@@ -260,10 +284,10 @@ class _IntroBrandBlock extends StatelessWidget {
             interval: _HomeTimings.brandTextReveal,
             slideBegin: const Offset(0, 0.25),
             child: Text(
-              'blinkit',
+              context.l10n.brandName,
               style: commonTextStyle(
                 fontWeight: FontWeight.w800,
-                fontSize: dimensions.deviceAverage * 0.038,
+                fontSize: context.sizing.avg * 0.038,
               ).copyWith(height: 1.0),
             ),
           ),
@@ -272,11 +296,11 @@ class _IntroBrandBlock extends StatelessWidget {
             interval: _HomeTimings.brandMoneyReveal,
             slideBegin: const Offset(0, 0.22),
             child: Text(
-              'Money'.toUpperCase(),
+              context.l10n.brandMoney.toUpperCase(),
               style: commonTextStyle(
                 fontWeight: FontWeight.w800,
-                fontSize: dimensions.deviceAverage * 0.065,
-              ).copyWith(height: 1.0, letterSpacing: dimensions.deviceWidth * 0.015),
+                fontSize: context.sizing.avg * 0.065,
+              ).copyWith(height: 1.0, letterSpacing: context.sizing.width * 0.015),
             ),
           ),
         ],
@@ -296,37 +320,37 @@ class _FeatureCardsSection extends StatelessWidget {
     return ListView(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      padding: EdgeInsetsDirectional.only(top: dimensions.deviceHeight * 0.035, bottom: dimensions.deviceHeight * 0.02),
+      padding: EdgeInsetsDirectional.only(top: context.sizing.height * 0.035, bottom: context.sizing.height * 0.02),
       children: [
         _Reveal(
           controller: introController,
           interval: _HomeTimings.card1Reveal,
           child: CommonCard(
             assetsString: 'assets/images/wallet.png',
-            title: 'Single tap payments',
-            message: 'Enjoy seamless payment without the wait for OTPs',
+            title: context.l10n.feature1Title,
+            message: context.l10n.feature1Message,
             backgroundColor: cardBackgroundColor,
           ),
         ),
-        SizedBox(height: dimensions.deviceHeight * 0.015),
+        SizedBox(height: context.sizing.height * 0.015),
         _Reveal(
           controller: introController,
           interval: _HomeTimings.card2Reveal,
           child: CommonCard(
             assetsString: 'assets/images/wallet.png',
-            title: 'Zero Failure',
-            message: 'Zero payment failures ensure you never miss an order',
+            title: context.l10n.feature2Title,
+            message: context.l10n.feature2Message,
             backgroundColor: cardBackgroundColor,
           ),
         ),
-        SizedBox(height: dimensions.deviceHeight * 0.015),
+        SizedBox(height: context.sizing.height * 0.015),
         _Reveal(
           controller: introController,
           interval: _HomeTimings.card3Reveal,
           child: CommonCard(
             assetsString: 'assets/images/wallet.png',
-            title: 'Real-time refunds',
-            message: 'No Need to wait for refunds. Blinkit money refunds are instant!',
+            title: context.l10n.feature3Title,
+            message: context.l10n.feature3Message,
             backgroundColor: cardBackgroundColor,
           ),
         ),
@@ -349,31 +373,31 @@ class _FinalSection extends StatelessWidget {
           controller: introController,
           interval: _HomeTimings.finalReveal,
           slideBegin: Offset.zero,
-          child: CommonButton(text: 'Add Money'),
+          child: CommonButton(text: context.l10n.addMoney),
         ),
-        SizedBox(height: dimensions.deviceHeight * 0.03),
+        SizedBox(height: context.sizing.height * 0.03),
         _Reveal(
           controller: introController,
           interval: _HomeTimings.finalReveal,
           slideBegin: Offset.zero,
           child: CommonSecondaryCard(
             assetsString: 'assets/images/wallet.png',
-            title: 'Claim Gift Card',
-            message: 'Enter gift card details to claim your gift card',
+            title: context.l10n.claimGiftCardTitle,
+            message: context.l10n.claimGiftCardMessage,
           ),
         ),
-        SizedBox(height: dimensions.deviceHeight * 0.03),
+        SizedBox(height: context.sizing.height * 0.03),
         _Reveal(
           controller: introController,
           interval: _HomeTimings.finalReveal,
           slideBegin: Offset.zero,
           child: Text(
-            'Enjoy seamless \n one tap payments',
+            context.l10n.tagline,
             textAlign: TextAlign.center,
             style: commonTextStyle(
               textColor: Colors.white24,
               fontWeight: FontWeight.w800,
-              fontSize: dimensions.deviceAverage * 0.05,
+              fontSize: context.sizing.avg * 0.05,
             ).copyWith(letterSpacing: 1, height: 0.95),
             textHeightBehavior: const TextHeightBehavior(
               applyHeightToFirstAscent: false,
@@ -426,7 +450,6 @@ class _HomeTimings {
   static const Duration hoverDuration = Duration(milliseconds: 2200);
   static const Duration confettiDelay = Duration(milliseconds: 800);
 
-  static const Interval confettiFade = Interval(0.12, 0.42, curve: Curves.easeOut);
   static const Interval leadingReveal = Interval(0, 0.18, curve: Curves.easeOutCubic);
   static const Interval settingsReveal = Interval(0.76, 0.90, curve: Curves.easeOutCubic);
 

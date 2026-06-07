@@ -24,7 +24,7 @@ class GlassedIconContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double size = (dimensions.deviceAverage * 0.05).clamp(48.0, 56.0).toDouble();
+    final double size = context.sizing.scale(0.05, min: 48, max: 56);
 
     return Container(
       margin: margin,
@@ -40,7 +40,7 @@ class GlassedIconContainer extends StatelessWidget {
               child: DecoratedBox(
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: Colors.white.withValues(alpha: 0.08),
+                  color: context.appColors.glassFill,
                   boxShadow: [
                     BoxShadow(color: Colors.black.withValues(alpha: 0.32), blurRadius: 20, offset: const Offset(0, 8)),
                   ],

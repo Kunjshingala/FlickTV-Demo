@@ -1,0 +1,68 @@
+{
+  "@@locale": "en",
+
+  "appTitle": "Flick TV Example",
+  "@appTitle": {
+    "description": "The application title shown to the OS (task switcher, etc.)."
+  },
+
+  "brandName": "blinkit",
+  "@brandName": {
+    "description": "Brand wordmark shown above the hero heading."
+  },
+
+  "brandMoney": "Money",
+  "@brandMoney": {
+    "description": "Product name shown as the large hero heading."
+  },
+
+  "feature1Title": "Single tap payments",
+  "@feature1Title": {
+    "description": "Title of the first feature card."
+  },
+
+  "feature1Message": "Enjoy seamless payment without the wait for OTPs",
+  "@feature1Message": {
+    "description": "Supporting text of the first feature card."
+  },
+
+  "feature2Title": "Zero Failure",
+  "@feature2Title": {
+    "description": "Title of the second feature card."
+  },
+
+  "feature2Message": "Zero payment failures ensure you never miss an order",
+  "@feature2Message": {
+    "description": "Supporting text of the second feature card."
+  },
+
+  "feature3Title": "Real-time refunds",
+  "@feature3Title": {
+    "description": "Title of the third feature card."
+  },
+
+  "feature3Message": "No Need to wait for refunds. Blinkit money refunds are instant!",
+  "@feature3Message": {
+    "description": "Supporting text of the third feature card."
+  },
+
+  "addMoney": "Add Money",
+  "@addMoney": {
+    "description": "Primary call-to-action button label."
+  },
+
+  "claimGiftCardTitle": "Claim Gift Card",
+  "@claimGiftCardTitle": {
+    "description": "Title of the gift card secondary card."
+  },
+
+  "claimGiftCardMessage": "Enter gift card details to claim your gift card",
+  "@claimGiftCardMessage": {
+    "description": "Supporting text of the gift card secondary card."
+  },
+
+  "tagline": "Enjoy seamless \n one tap payments",
+  "@tagline": {
+    "description": "Closing tagline. The line break is intentional."
+  }
+}

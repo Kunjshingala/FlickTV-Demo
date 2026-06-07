@@ -2,16 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:lottie/lottie.dart';
 
-import 'screen/home/home.dart';
+import 'l10n/l10n.dart';
+import 'router/app_router.dart';
+import 'utils/preloaded_assets.dart';
 import 'utils/utils.dart';
-
-LottieComposition? preloadedConfetti;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   try {
-    preloadedConfetti = await AssetLottie('assets/lottie/confetti.json').load();
+    PreloadedAssets.confetti = await AssetLottie('assets/lottie/confetti.json').load();
   } catch (e) {
     debugPrint("Failed to preload confetti: $e");
   }
@@ -26,25 +26,22 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
 
-    return MaterialApp(
-      title: 'Flick TV Example',
+    return MaterialApp.router(
+      onGenerateTitle: (context) => context.l10n.appTitle,
       debugShowCheckedModeBanner: false,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
       scrollBehavior: const MaterialScrollBehavior().copyWith(
         overscroll: false, // Disables overscroll glow/bounce globally
       ),
-      theme: ThemeData.dark(useMaterial3: true),
+      theme: buildAppTheme(),
       builder: (context, child) {
-        final data = MediaQuery.of(context);
-
-        dimensions.setDeviceHeight = data.size.height;
-        dimensions.setDeviceWidth = data.size.width;
-
         return MediaQuery(
           data: MediaQuery.of(context).copyWith(textScaler: TextScaler.linear(1.0)),
           child: child ?? const SizedBox.shrink(),
         );
       },
-      home: const HomeScreen(),
+      routerConfig: AppRouter.router,
     );
   }
 }

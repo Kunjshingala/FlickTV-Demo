@@ -10,18 +10,18 @@ class CommonButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onTap?.call,
+      onTap: onTap,
       behavior: HitTestBehavior.opaque,
       child: Container(
         width: double.maxFinite,
         alignment: AlignmentDirectional.center,
         padding: EdgeInsetsDirectional.symmetric(
-          vertical: dimensions.deviceHeight * 0.02,
-          horizontal: dimensions.deviceWidth * 0.01,
+          vertical: context.sizing.height * 0.02,
+          horizontal: context.sizing.width * 0.01,
         ),
         decoration: BoxDecoration(
-          color: Color(0xFF1B8F20),
-          borderRadius: BorderRadiusDirectional.circular(dimensions.deviceAverage * 0.0225),
+          color: context.appColors.success,
+          borderRadius: BorderRadiusDirectional.circular(context.sizing.avg * 0.0225),
         ),
         child: Text(
           text,
@@ -29,7 +29,7 @@ class CommonButton extends StatelessWidget {
           maxLines: 1,
           style: commonTextStyle(
             fontWeight: FontWeight.w600,
-            fontSize: dimensions.deviceAverage * 0.025,
+            fontSize: context.sizing.avg * 0.025,
           ).copyWith(height: 1.0),
         ),
       ),

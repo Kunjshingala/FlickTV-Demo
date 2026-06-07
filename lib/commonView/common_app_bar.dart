@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../utils/dimensions.dart';
+import '../utils/sizing.dart';
 import '../utils/styles.dart';
 import 'common_view.dart';
 
@@ -45,7 +45,7 @@ class CommonAppBar extends StatelessWidget implements PreferredSizeWidget {
     Widget? leadingWidget = leading;
     if (leadingWidget == null && automaticallyImplyLeading && canPop) {
       leadingWidget = GlassedIconContainer(
-        margin: EdgeInsetsDirectional.only(start: commonHorizontalSpacing),
+        margin: EdgeInsetsDirectional.only(start: context.sizing.hSpacing),
         iconData: Icons.chevron_left_rounded,
       );
     }
@@ -64,9 +64,9 @@ class CommonAppBar extends StatelessWidget implements PreferredSizeWidget {
       scrolledUnderElevation: scrolledUnderElevation,
       surfaceTintColor: surfaceTintColor,
       automaticallyImplyLeading: false,
-      leadingWidth: leadingWidget == null ? null : leadingWidth ?? (commonHorizontalSpacing + kToolbarHeight),
+      leadingWidth: leadingWidget == null ? null : leadingWidth ?? (context.sizing.hSpacing + kToolbarHeight),
       leading: appBarLeading,
-      title: customTitle ?? ((titleText.isNotEmpty) ? Text(titleText, style: commonTextStyle()) : SizedBox.shrink()),
+      title: customTitle ?? ((titleText.isNotEmpty) ? Text(titleText, style: commonTextStyle(fontSize: context.sizing.avg * 0.0225)) : SizedBox.shrink()),
       centerTitle: centerTitle,
       actions: actions,
       systemOverlayStyle: systemUiOverlayStyle,

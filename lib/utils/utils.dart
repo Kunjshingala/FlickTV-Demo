@@ -1,4 +1,5 @@
 export 'colors.dart';
-export 'dimensions.dart';
 export 'painters/painters.dart';
+export 'sizing.dart';
 export 'styles.dart';
+export 'theme.dart';
